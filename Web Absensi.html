@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Absensi Digital — Guru & Murid</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --bg-main: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 25px -5px rgba(37, 99, 235, 0.15);
+
+      --hadir-bg: #dcfce7;
+      --hadir-text: #15803d;
+      --izin-bg: #dbeafe;
+      --izin-text: #1d4ed8;
+      --sakit-bg: #fef9c3;
+      --sakit-text: #a16207;
+      --alpha-bg: #fee2e2;
+      --alpha-text: #b91c1c;
+    }
+
+    body.dark-mode {
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-light: #1e293b;
+      --primary-border: #334155;
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+
+      --hadir-bg: rgba(21, 128, 61, 0.25);
+      --hadir-text: #4ade80;
+      --izin-bg: rgba(29, 78, 216, 0.25);
+      --izin-text: #60a5fa;
+      --sakit-bg: rgba(161, 98, 7, 0.25);
+      --sakit-text: #facc15;
+      --alpha-bg: rgba(185, 28, 28, 0.25);
+      --alpha-text: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-height: 100vh;
+    }
+
+    /* ================= LOGIN SCREEN ================= */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #60a5fa 100%);
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 430px;
+      padding: 2.25rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--border-color);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-logo {
+      width: 56px;
+      height: 56px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.85rem;
+      border: 1px solid var(--primary-border);
+    }
+
+    .login-header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .login-header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ROLE SWITCHER TABS */
+    .role-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg-main);
+      padding: 0.3rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1rem;
+      gap: 0.3rem;
+    }
+
+    .role-tab {
+      padding: 0.6rem 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .role-tab.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .auth-mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.25rem;
+      gap: 0.5rem;
+    }
+
+    .auth-mode-tab {
+      padding: 0.65rem 0.5rem;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .auth-mode-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: var(--text-main);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.68rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.925rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+
+    .login-hint {
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .login-hint strong {
+      color: var(--primary);
+    }
+
+    .error-msg {
+      background: var(--alpha-bg);
+      color: var(--alpha-text);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+      display: none;
+      font-weight: 500;
+    }
+
+    .info-msg {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      line-height: 1.45;
+    }
+
+    /* ================= BUTTONS ================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.15rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #dc2626;
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+
+    /* ================= SHARED APP SHELL ================= */
+    .app-view {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      color: #ffffff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-text h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .role-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .brand-text span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .clock-box {
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      text-align: right;
+    }
+
+    .clock-time {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+    }
+
+    /* ================= GURU DASHBOARD ================= */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.1rem 1.2rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-left: 4px solid var(--primary);
+    }
+
+    .stat-card.hadir { border-left-color: #16a34a; }
+    .stat-card.izin { border-left-color: #2563eb; }
+    .stat-card.sakit { border-left-color: #eab308; }
+    .stat-card.alpha { border-left-color: #dc2626; }
+    .stat-card.belum { border-left-color: #64748b; }
+
+    .stat-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat-info h3 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+      color: var(--text-main);
+    }
+
+    .stat-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .stat-card.total .stat-badge { background: var(--primary-light); color: var(--primary); }
+    .stat-card.hadir .stat-badge { background: var(--hadir-bg); color: var(--hadir-text); }
+    .stat-card.izin .stat-badge { background: var(--izin-bg); color: var(--izin-text); }
+    .stat-card.sakit .stat-badge { background: var(--sakit-bg); color: var(--sakit-text); }
+    .stat-card.alpha .stat-badge { background: var(--alpha-bg); color: var(--alpha-text); }
+    .stat-card.belum .stat-badge { background: var(--bg-main); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .panel-title h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .panel-title p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .sync-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--hadir-text);
+      background: var(--hadir-bg);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.6rem 0.9rem 0.6rem 2.3rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .filter-select {
+      padding: 0.6rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* TABLE */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      min-width: 880px;
+    }
+
+    thead {
+      background: var(--primary-light);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      padding: 0.9rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--primary);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.88rem;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(37, 99, 235, 0.04);
+    }
+
+    .student-name {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .student-note {
+      display: block;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      font-style: italic;
+    }
+
+    .student-nis {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: var(--bg-main);
+      padding: 0.2rem 0.45rem;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+    }
+
+    .time-badge {
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    /* ATTENDANCE BUTTON GROUP */
+    .att-group {
+      display: inline-flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .att-btn {
+      padding: 0.34rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .att-btn:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+
+    .att-btn.active-Hadir {
+      background: var(--hadir-bg);
+      color: var(--hadir-text);
+      border-color: transparent;
+    }
+
+    .att-btn.active-Izin {
+      background: var(--izin-bg);
+      color: var(--izin-text);
+      border-color: transparent;
+    }
+
+    .att-btn.active-Sakit {
+      background: var(--sakit-bg);
+      color: var(--sakit-text);
+      border-color: transparent;
+    }
+
+    .att-btn.active-Alpha {
+      background: var(--alpha-bg);
+      color: var(--alpha-text);
+      border-color: transparent;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .pill-Hadir { background: var(--hadir-bg); color: var(--hadir-text); }
+    .pill-Izin { background: var(--izin-bg); color: var(--izin-text); }
+    .pill-Sakit { background: var(--sakit-bg); color: var(--sakit-text); }
+    .pill-Alpha { background: var(--alpha-bg); color: var(--alpha-text); }
+    .pill-Belum { background: var(--bg-main); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+    .action-btns {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 0.85rem;
+      border-radius: 12px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state h4 {
+      color: var(--text-main);
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+
+    /* ================= MURID DASHBOARD ================= */
+    .student-layout {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .profile-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-left: 5px solid var(--primary);
+    }
+
+    .profile-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .profile-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .profile-details h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .profile-meta {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.3rem;
+      flex-wrap: wrap;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+    }
+
+    .status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .status-banner-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .status-banner-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      padding: 0.45rem 1.35rem;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-banner-time {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .attendance-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .choice-card {
+      border: 2px solid var(--border-color);
+      background: var(--bg-main);
+      border-radius: 12px;
+      padding: 1rem 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .choice-card:hover {
+      border-color: var(--primary);
+    }
+
+    .choice-card.selected-Hadir {
+      background: var(--hadir-bg);
+      border-color: #16a34a;
+      color: var(--hadir-text);
+    }
+
+    .choice-card.selected-Izin {
+      background: var(--izin-bg);
+      border-color: #2563eb;
+      color: var(--izin-text);
+    }
+
+    .choice-card.selected-Sakit {
+      background: var(--sakit-bg);
+      border-color: #eab308;
+      color: var(--sakit-text);
+    }
+
+    .choice-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    .choice-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    /* ================= MODAL ================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 440px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: popIn 0.2s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 1.1rem 1.35rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 1.35rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.35rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.65rem;
+    }
+
+    /* ================= TOAST ================= */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 0.75rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+      border-left: 4px solid var(--primary);
+      transform: translateY(140%);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 200;
+      max-width: 90vw;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 768px) {
+      .navbar {
+      <!-- Pilihan Role Login / Daftar -->
+      <div class="role-tabs">
+        <button type="button" class="role-tab active" id="tab-guru">Akun Guru</button>
+        <button type="button" class="role-tab" id="tab-murid">Akun Murid</button>
+      </div>
+
+      <!-- Pilihan Mode: Masuk atau Buat Akun Baru -->
+      <div class="auth-mode-tabs">
+        <button type="button" class="auth-mode-tab active" id="mode-login">Masuk</button>
+        <button type="button" class="auth-mode-tab" id="mode-register">Buat Akun Baru</button>
+      </div>
+
+      <!-- FORM MASUK GURU -->
+      <form id="guru-login-form">
+        <div class="info-msg">
+          Belum punya akun guru? Pilih tab <strong>Buat Akun Baru</strong> untuk membuat username &amp; password sendiri.
+        </div>
+        <div class="form-group">
+          <label for="guru-login-username">Username Guru</label>
+          <input type="text" id="guru-login-username" class="form-control" placeholder="Masukkan username guru" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="guru-login-password">Password</label>
+          <input type="password" id="guru-login-password" class="form-control" placeholder="Masukkan password" required />
+        </div>
+        <p id="guru-login-error" class="error-msg">Username atau password guru tidak ditemukan!</p>
+        <button type="submit" class="btn btn-primary btn-block">Masuk sebagai Guru</button>
+      </form>
+
+      <!-- FORM BUAT AKUN BARU GURU -->
+      <form id="guru-register-form" style="display: none;">
+        <div class="form-group">
+          <label for="guru-reg-name">Nama Guru (Opsional)</label>
+          <input type="text" id="guru-reg-name" class="form-control" placeholder="Contoh: Budi Santoso, S.Pd." autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="guru-reg-kelas">Kelas / Mata Pelajaran Diampu (Opsional)</label>
+          <input type="text" id="guru-reg-kelas" class="form-control" placeholder="Contoh: XII-A / Matematika" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="guru-reg-username">Username Baru</label>
+          <input type="text" id="guru-reg-username" class="form-control" placeholder="Buat username guru" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="guru-reg-password">Password Baru</label>
+          <input type="password" id="guru-reg-password" class="form-control" placeholder="Buat password (min. 4 karakter)" minlength="4" required />
+        </div>
+        <p id="guru-register-error" class="error-msg"></p>
+        <button type="submit" class="btn btn-primary btn-block">Daftar &amp; Masuk Akun Guru</button>
+      </form>
+
+      <!-- FORM MASUK MURID -->
+      <form id="murid-login-form" style="display: none;">
+        <div class="info-msg">
+          Murid baru bisa membuat akun sendiri lewat tab <strong>Buat Akun Baru</strong> agar otomatis terhubung ke daftar presensi.
+        </div>
+        <div class="form-group">
+          <label for="murid-login-username">Username Murid</label>
+          <input type="text" id="murid-login-username" class="form-control" placeholder="Masukkan username murid" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="murid-login-password">Password</label>
+          <input type="password" id="murid-login-password" class="form-control" placeholder="Masukkan password" required />
+        </div>
+        <p id="murid-login-error" class="error-msg">Username atau password murid salah!</p>
+        <button type="submit" class="btn btn-primary btn-block">Masuk sebagai Murid</button>
+      </form>
+
+      <!-- FORM BUAT AKUN BARU MURID -->
+      <form id="murid-register-form" style="display: none;">
+        <div class="form-group">
+          <label for="murid-reg-nis">Nomor Induk Siswa (NIS)</label>
+          <input type="text" id="murid-reg-nis" class="form-control" placeholder="Contoh: 2026001" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="murid-reg-name">Nama Lengkap</label>
+          <input type="text" id="murid-reg-name" class="form-control" placeholder="Masukkan nama lengkap siswa" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="murid-reg-kelas">Kelas</label>
+          <input type="text" id="murid-reg-kelas" class="form-control" placeholder="Contoh: XII-A" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="murid-reg-username">Username Murid</label>
+          <input type="text" id="murid-reg-username" class="form-control" placeholder="Buat username unik untuk login" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="murid-reg-password">Password Murid</label>
+          <input type="password" id="murid-reg-password" class="form-control" placeholder="Buat password (min. 4 karakter)" minlength="4" required />
+        </div>
+        <p id="murid-register-error" class="error-msg"></p>
+        <button type="submit" class="btn btn-primary btn-block">Daftar &amp; Masuk Akun Murid</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== 2. DASHBOARD VERSI GURU ==================== -->
+  <div id="guru-screen" class="app-view">
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>AbsensiKu Digital <span class="role-badge">Versi Guru</span></h2>
+          <span id="guru-header-subtitle">Panel Administrasi &amp; Monitoring Presensi Kelas</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="clock-box">
+          <div class="clock-time realtime-clock">00:00:00</div>
+          <div class="clock-date realtime-date">Memuat tanggal...</div>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-sm theme-toggle-btn" title="Ganti Tema">
+          <span class="theme-icon">🌙</span> <span class="theme-label">Dark Mode</span>
+        </button>
+
+        <button type="button" class="btn btn-danger btn-sm logout-btn">Keluar</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- REKAP KEHADIRAN REAL-TIME -->
+      <section class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-info">
+            <p>Total Siswa</p>
+            <h3 id="stat-total">0</h3>
+          </div>
+          <div class="stat-badge">∑</div>
+        </div>
+        <div class="stat-card hadir">
+          <div class="stat-info">
+            <p>Hadir</p>
+            <h3 id="stat-hadir">0</h3>
+          </div>
+          <div class="stat-badge">H</div>
+        </div>
+        <div class="stat-card izin">
+          <div class="stat-info">
+            <p>Izin</p>
+            <h3 id="stat-izin">0</h3>
+          </div>
+          <div class="stat-badge">I</div>
+        </div>
+        <div class="stat-card sakit">
+          <div class="stat-info">
+            <p>Sakit</p>
+            <h3 id="stat-sakit">0</h3>
+          </div>
+          <div class="stat-badge">S</div>
+        </div>
+        <div class="stat-card alpha">
+          <div class="stat-info">
+            <p>Alpha</p>
+            <h3 id="stat-alpha">0</h3>
+          </div>
+          <div class="stat-badge">A</div>
+        </div>
+        <div class="stat-card belum">
+          <div class="stat-info">
+            <p>Belum Absen</p>
+            <h3 id="stat-belum">0</h3>
+          </div>
+          <div class="stat-badge">?</div>
+        </div>
+      </section>
+
+      <!-- TABEL DATA & ABSENSI SISWA -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+              <h3>Daftar Presensi & Data Siswa</h3>
+              <span class="sync-indicator"><span class="sync-dot"></span> Sinkronisasi Real-Time Aktif</span>
+            </div>
+            <p>Tambahkan siswa terlebih dahulu agar murid dapat login & mengisi absensi mandiri</p>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" id="reset-attendance-btn">Reset Absensi Hari Ini</button>
+            <button type="button" class="btn btn-primary btn-sm" id="open-add-modal">+ Tambah Siswa</button>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-box">
+              <span class="search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
+              <input type="text" id="search-input" placeholder="Cari nama siswa, NIS, atau kelas..." />
+            </div>
+
+            <select id="filter-status" class="filter-select">
+              <option value="ALL">Semua Status</option>
+              <option value="Hadir">Hadir</option>
+              <option value="Izin">Izin</option>
+              <option value="Sakit">Sakit</option>
+              <option value="Alpha">Alpha</option>
+              <option value="Belum">Belum Absen</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px;">No</th>
+                <th>NIS</th>
+                <th>Nama Siswa & Catatan</th>
+                <th>Kelas</th>
+                <th>Status</th>
+                <th>Waktu Tercatat</th>
+                <th>Ubah Status (Guru)</th>
+                <th style="width: 130px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="student-table-body">
+              <!-- Data dirender oleh JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== 3. DASHBOARD VERSI MURID ==================== -->
+  <div id="murid-screen" class="app-view">
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>AbsensiKu Digital <span class="role-badge">Versi Murid</span></h2>
+          <span>Portal Presensi Mandiri Siswa</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="clock-box">
+          <div class="clock-time realtime-clock">00:00:00</div>
+          <div class="clock-date realtime-date">Memuat tanggal...</div>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-sm theme-toggle-btn" title="Ganti Tema">
+          <span class="theme-icon">🌙</span> <span class="theme-label">Dark Mode</span>
+        </button>
+
+        <button type="button" class="btn btn-danger btn-sm logout-btn">Keluar</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="student-layout">
+        <!-- PROFIL MURID -->
+        <section class="profile-card">
+          <div class="profile-main">
+            <div class="profile-avatar" id="murid-avatar">S</div>
+            <div class="profile-details">
+            <h3 id="murid-profile-name">Nama Siswa</h3>
+            <div class="profile-meta">
+              <span>Username: <strong id="murid-profile-username" style="color: var(--text-main);">-</strong></span>
+              <span>•</span>
+              <span>NIS: <strong id="murid-profile-nis" style="color: var(--text-main);">-</strong></span>
+              <span>•</span>
+              <span>Kelas: <strong id="murid-profile-kelas" style="color: var(--text-main);">-</strong></span>
+            </div>
+          </div>
+        </div>
+        <span class="sync-indicator"><span class="sync-dot"></span> Terhubung ke Guru</span>
+      </section>
+
+        <!-- STATUS PRESENSI HARI INI -->
+        <section class="status-banner">
+          <div class="status-banner-label">Status Kehadiran Anda Hari Ini</div>
+          <div>
+            <span id="murid-current-pill" class="status-banner-value pill-Belum">Belum Absen</span>
+          </div>
+          <p id="murid-current-time" class="status-banner-time">Anda belum mengirimkan presensi hari ini.</p>
+          <p id="murid-current-note" class="student-note" style="margin-top: 0.4rem;"></p>
+        </section>
+
+        <!-- FORM PRESENSI MANDIRI -->
+        <section class="panel" id="murid-form-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <h3>Formulir Presensi Mandiri</h3>
+              <p id="murid-form-subtitle">Pilih status kehadiran Anda hari ini lalu klik Kirim Absensi</p>
+            </div>
+          </div>
+
+          <div style="padding: 1.5rem;">
+            <form id="murid-attendance-form">
+              <div class="attendance-choice-grid">
+                <div class="choice-card" data-choice="Hadir">
+                  <span class="choice-icon">✅</span>
+                  <span class="choice-title">Hadir</span>
+                </div>
+                <div class="choice-card" data-choice="Izin">
+                  <span class="choice-icon">📝</span>
+                  <span class="choice-title">Izin</span>
+                </div>
+                <div class="choice-card" data-choice="Sakit">
+                  <span class="choice-icon">🩺</span>
+                  <span class="choice-title">Sakit</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="murid-note-input">Catatan / Keterangan (Opsional, wajib diisi jika Izin/Sakit)</label>
+                <input type="text" id="murid-note-input" class="form-control" placeholder="Contoh: Hadir tepat waktu / Izin acara keluarga / Demam..." />
+              </div>
+
+              <button type="submit" id="murid-submit-btn" class="btn btn-primary btn-block">Kirim Absensi Sekarang</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== MODAL TAMBAH / EDIT SISWA (GURU) ==================== -->
+  <div class="modal-backdrop" id="student-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h4 id="modal-title">Tambah Siswa Baru</h4>
+        <button type="button" class="close-modal" id="close-modal-btn">&times;</button>
+      </div>
+      <form id="student-form">
+        <div class="modal-body">
+          <input type="hidden" id="student-id" />
+          <div class="form-group">
+            <label for="student-nis">Nomor Induk Siswa (NIS)</label>
+            <input type="text" id="student-nis" class="form-control" placeholder="Contoh: 2026001" required />
+          </div>
+          <div class="form-group">
+            <label for="student-name">Nama Lengkap</label>
+            <input type="text" id="student-name" class="form-control" placeholder="Masukkan nama lengkap siswa" required />
+          </div>
+          <div class="form-group">
+            <label for="student-class">Kelas</label>
+            <input type="text" id="student-class" class="form-control" placeholder="Contoh: XII-A" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="cancel-modal-btn">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL KONFIRMASI CUSTOM ==================== -->
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="modal" style="max-width: 390px;">
+      <div class="modal-header">
+        <h4 id="confirm-title">Konfirmasi</h4>
+        <button type="button" class="close-modal" id="close-confirm-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message" style="font-size: 0.92rem; line-height: 1.5; color: var(--text-main);"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancel-confirm-btn">Batal</button>
+        <button type="button" class="btn btn-danger" id="ok-confirm-btn">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFIKASI TOAST -->
+  <div id="toast" class="toast">Pesan notifikasi</div>
+
+  <script>
+    // ========================================================
+    // KONFIGURASI PENYIMPANAN (TANPA DATA AWAL / KOSONG)
+    // ========================================================
+    const STORAGE_KEYS = {
+      SESSION: 'absensi_v3_session',      // { role: 'guru' | 'murid', userId: string }
+      TEACHERS: 'absensi_v3_teachers',    // Array of teacher accounts (default [])
+      STUDENTS: 'absensi_v3_students',    // Array of student accounts & attendance (default [])
+      THEME: 'absensi_v3_theme'
+    };
+
+    let teachers = [];
+    let students = [];
+    let activeRoleTab = 'guru';
+    let activeAuthMode = 'login';
+    let selectedMuridChoice = 'Hadir';
+    let confirmCallback = null;
+
+    // ========================================================
+    // REFERENSI ELEMEN DOM
+    // ========================================================
+    const loginScreen = document.getElementById('login-screen');
+    const guruScreen = document.getElementById('guru-screen');
+    const muridScreen = document.getElementById('murid-screen');
+
+    const tabGuru = document.getElementById('tab-guru');
+    const tabMurid = document.getElementById('tab-murid');
+    const modeLoginBtn = document.getElementById('mode-login');
+    const modeRegisterBtn = document.getElementById('mode-register');
+
+    const guruLoginForm = document.getElementById('guru-login-form');
+    const guruRegisterForm = document.getElementById('guru-register-form');
+    const muridLoginForm = document.getElementById('murid-login-form');
+    const muridRegisterForm = document.getElementById('murid-register-form');
+
+    const guruLoginError = document.getElementById('guru-login-error');
+    const guruRegisterError = document.getElementById('guru-register-error');
+    const muridLoginError = document.getElementById('murid-login-error');
+    const muridRegisterError = document.getElementById('murid-register-error');
+
+    const guruHeaderSubtitle = document.getElementById('guru-header-subtitle');
+
+    // Elemen Dashboard Guru
+    const statTotal = document.getElementById('stat-total');
+    const statHadir = document.getElementById('stat-hadir');
+    const statIzin = document.getElementById('stat-izin');
+    const statSakit = document.getElementById('stat-sakit');
+    const statAlpha = document.getElementById('stat-alpha');
+    const statBelum = document.getElementById('stat-belum');
+    const tableBody = document.getElementById('student-table-body');
+    const searchInput = document.getElementById('search-input');
+    const filterStatus = document.getElementById('filter-status');
+    const resetAttendanceBtn = document.getElementById('reset-attendance-btn');
+
+    // Elemen Modal Tambah/Edit
+    const studentModal = document.getElementById('student-modal');
+    const openAddModalBtn = document.getElementById('open-add-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const cancelModalBtn = document.getElementById('cancel-modal-btn');
+    const studentForm = document.getElementById('student-form');
+    const modalTitle = document.getElementById('modal-title');
+    const inputId = document.getElementById('student-id');
+    const inputNis = document.getElementById('student-nis');
+    const inputName = document.getElementById('student-name');
+    const inputClass = document.getElementById('student-class');
+
+    // Elemen Modal Konfirmasi
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmMessage = document.getElementById('confirm-message');
+    const closeConfirmBtn = document.getElementById('close-confirm-btn');
+    const cancelConfirmBtn = document.getElementById('cancel-confirm-btn');
+    const okConfirmBtn = document.getElementById('ok-confirm-btn');
+
+    // Elemen Dashboard Murid
+    const muridAvatar = document.getElementById('murid-avatar');
+    const muridProfileName = document.getElementById('murid-profile-name');
+    const muridProfileUsername = document.getElementById('murid-profile-username');
+    const muridProfileNis = document.getElementById('murid-profile-nis');
+    const muridProfileKelas = document.getElementById('murid-profile-kelas');
+    const muridCurrentPill = document.getElementById('murid-current-pill');
+    const muridCurrentTime = document.getElementById('murid-current-time');
+    const muridCurrentNote = document.getElementById('murid-current-note');
+    const muridFormSubtitle = document.getElementById('murid-form-subtitle');
+    const muridAttendanceForm = document.getElementById('murid-attendance-form');
+    const muridNoteInput = document.getElementById('murid-note-input');
+    const muridSubmitBtn = document.getElementById('murid-submit-btn');
+    const choiceCards = document.querySelectorAll('.choice-card');
+
+    const toastEl = document.getElementById('toast');
+    let toastTimer;
+
+    // ========================================================
+    // UTILITAS & PENYIMPANAN
+    // ========================================================
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove('show');
+    function loadTeachers() {
+      const raw = localStorage.getItem(STORAGE_KEYS.TEACHERS);
+      if (!raw) {
+        teachers = [];
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        teachers = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        teachers = [];
+      }
+    }
+
+    function saveTeachers() {
+      localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(teachers));
+    }
+
+    function loadStudents() {
+      const raw = localStorage.getItem(STORAGE_KEYS.STUDENTS);
+      if (!raw) {
+        students = [];
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        students = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        students = [];
+      }
+    }
+
+    function saveStudents() {
+      localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+    }
+
+    function getSession() {
+      const raw = localStorage.getItem(STORAGE_KEYS.SESSION);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setSession(sessionObj) {
+      if (sessionObj) {
+        localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(sessionObj));
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.SESSION);
+      }
+    }
+
+    // Modal Konfirmasi Pengganti confirm() Bawaan Browser
+    function openConfirm(title, message, onConfirm) {
+      confirmTitle.textContent = title;
+      confirmMessage.textContent = message;
+      confirmCallback = onConfirm;
+      confirmModal.classList.add('open');
+    }
+
+    function closeConfirm() {
+      confirmModal.classList.remove('open');
+      confirmCallback = null;
+    }
+
+    closeConfirmBtn.addEventListener('click', closeConfirm);
+    cancelConfirmBtn.addEventListener('click', closeConfirm);
+    okConfirmBtn.addEventListener('click', () => {
+      if (typeof confirmCallback === 'function') {
+        confirmCallback();
+      }
+      closeConfirm();
+    });
+
+    // ========================================================
+    // NAVIGASI ROLE & MODE AUTENTIKASI (MASUK / BUAT AKUN)
+    // ========================================================
+    function hideAllAuthErrors() {
+      guruLoginError.style.display = 'none';
+      guruRegisterError.style.display = 'none';
+      muridLoginError.style.display = 'none';
+      muridRegisterError.style.display = 'none';
+    }
+
+    function updateAuthFormsVisibility() {
+      tabGuru.classList.toggle('active', activeRoleTab === 'guru');
+      tabMurid.classList.toggle('active', activeRoleTab === 'murid');
+      modeLoginBtn.classList.toggle('active', activeAuthMode === 'login');
+      modeRegisterBtn.classList.toggle('active', activeAuthMode === 'register');
+
+      guruLoginForm.style.display = (activeRoleTab === 'guru' && activeAuthMode === 'login') ? 'block' : 'none';
+      guruRegisterForm.style.display = (activeRoleTab === 'guru' && activeAuthMode === 'register') ? 'block' : 'none';
+      muridLoginForm.style.display = (activeRoleTab === 'murid' && activeAuthMode === 'login') ? 'block' : 'none';
+      muridRegisterForm.style.display = (activeRoleTab === 'murid' && activeAuthMode === 'register') ? 'block' : 'none';
+
+      hideAllAuthErrors();
+    }
+
+    tabGuru.addEventListener('click', () => {
+      activeRoleTab = 'guru';
+      updateAuthFormsVisibility();
+    });
+
+    tabMurid.addEventListener('click', () => {
+      activeRoleTab = 'murid';
+      updateAuthFormsVisibility();
+    });
+
+    modeLoginBtn.addEventListener('click', () => {
+      activeAuthMode = 'login';
+      updateAuthFormsVisibility();
+    });
+
+    modeRegisterBtn.addEventListener('click', () => {
+      activeAuthMode = 'register';
+      updateAuthFormsVisibility();
+    });
+
+    // Masuk Akun Guru
+    guruLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadTeachers();
+      const userVal = document.getElementById('guru-login-username').value.trim();
+      const passVal = document.getElementById('guru-login-password').value;
+
+      const foundTeacher = teachers.find(
+        t => t.username.toLowerCase() === userVal.toLowerCase() && t.password === passVal
+      );
+
+      if (!foundTeacher) {
+        guruLoginError.textContent = 'Username atau password guru salah / belum terdaftar.';
+        guruLoginError.style.display = 'block';
+        return;
+      }
+
+      hideAllAuthErrors();
+      guruLoginForm.reset();
+      setSession({ role: 'guru', userId: foundTeacher.id });
+      routeApp();
+      showToast(`Selamat datang, ${foundTeacher.name || foundTeacher.username}!`);
+    });
+
+    // Buat Akun Baru Guru
+    guruRegisterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadTeachers();
+      const nameVal = document.getElementById('guru-reg-name').value.trim();
+      const kelasVal = document.getElementById('guru-reg-kelas').value.trim();
+      const userVal = document.getElementById('guru-reg-username').value.trim();
+      const passVal = document.getElementById('guru-reg-password').value;
+
+      if (!userVal || passVal.length < 4) {
+        guruRegisterError.textContent = 'Username wajib diisi dan password minimal 4 karakter.';
+        guruRegisterError.style.display = 'block';
+        return;
+      }
+
+      const duplicateUser = teachers.some(
+        t => t.username.toLowerCase() === userVal.toLowerCase()
+      );
+      if (duplicateUser) {
+        guruRegisterError.textContent = `Username "${userVal}" sudah digunakan akun guru lain.`;
+        guruRegisterError.style.display = 'block';
+        return;
+      }
+
+      const newTeacher = {
+        id: 'tch_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        name: nameVal || userVal,
+        kelas: kelasVal || '',
+        username: userVal,
+        password: passVal
+      };
+
+      teachers.push(newTeacher);
+      saveTeachers();
+      hideAllAuthErrors();
+      guruRegisterForm.reset();
+      setSession({ role: 'guru', userId: newTeacher.id });
+      routeApp();
+      showToast(`Akun guru "${newTeacher.username}" berhasil dibuat!`);
+    });
+
+    // Masuk Akun Murid
+    muridLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadStudents();
+      const userVal = document.getElementById('murid-login-username').value.trim();
+      const passVal = document.getElementById('murid-login-password').value;
+
+      const foundStudent = students.find(
+        s => s.username && s.username.toLowerCase() === userVal.toLowerCase() && s.password === passVal
+      );
+
+      if (!foundStudent) {
+        muridLoginError.textContent = 'Username atau password murid salah / belum memiliki akun.';
+        muridLoginError.style.display = 'block';
+        return;
+      }
+
+      hideAllAuthErrors();
+      muridLoginForm.reset();
+      setSession({ role: 'murid', userId: foundStudent.id });
+      routeApp();
+      showToast(`Halo, ${foundStudent.name}!`);
+    });
+
+    // Buat Akun Baru Murid (Otomatis masuk daftar siswa terhubung dengan Guru)
+    muridRegisterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadStudents();
+      const nisVal = document.getElementById('murid-reg-nis').value.trim();
+      const nameVal = document.getElementById('murid-reg-name').value.trim();
+      const classVal = document.getElementById('murid-reg-kelas').value.trim();
+      const userVal = document.getElementById('murid-reg-username').value.trim();
+      const passVal = document.getElementById('murid-reg-password').value;
+
+      if (!nisVal || !nameVal || !classVal || !userVal || passVal.length < 4) {
+        muridRegisterError.textContent = 'Semua kolom wajib diisi dan password minimal 4 karakter.';
+        muridRegisterError.style.display = 'block';
+        return;
+      }
+
+      const duplicateNis = students.some(s => s.nis.toLowerCase() === nisVal.toLowerCase());
+      if (duplicateNis) {
+        muridRegisterError.textContent = `NIS "${nisVal}" sudah terdaftar dalam sistem.`;
+        muridRegisterError.style.display = 'block';
+        return;
+      }
+
+      const duplicateUsername = students.some(
+        s => s.username && s.username.toLowerCase() === userVal.toLowerCase()
+      );
+      if (duplicateUsername) {
+        muridRegisterError.textContent = `Username "${userVal}" sudah dipakai murid lain.`;
+        muridRegisterError.style.display = 'block';
+        return;
+      }
+
+      const newStudent = {
+        id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        nis: nisVal,
+        name: nameVal,
+        kelas: classVal,
+        username: userVal,
+        password: passVal,
+        status: 'Belum',
+        note: '',
+        updatedAt: '',
+        updatedBy: ''
+      };
+
+      students.push(newStudent);
+      saveStudents();
+      hideAllAuthErrors();
+      muridRegisterForm.reset();
+      setSession({ role: 'murid', userId: newStudent.id });
+      routeApp();
+      showToast(`Akun murid "${newStudent.name}" berhasil dibuat & terhubung!`);
+    });
+
+    // Logout Semua Role
+    document.querySelectorAll('.logout-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setSession(null);
+        routeApp();
+        showToast('Anda telah keluar dari sesi.');
+      });
+    });
+
+    // ========================================================
+    // ROUTING TAMPILAN BERDASARKAN ROLE
+    // ========================================================
+    function routeApp() {
+      loadTeachers();
+      loadStudents();
+      const session = getSession();
+
+      loginScreen.style.display = 'none';
+      guruScreen.style.display = 'none';
+      muridScreen.style.display = 'none';
+
+      if (!session) {
+        loginScreen.style.display = 'flex';
+        updateAuthFormsVisibility();
+        return;
+      }
+
+      if (session.role === 'guru') {
+        const activeTeacher = teachers.find(t => t.id === session.userId);
+        if (!activeTeacher) {
+          setSession(null);
+          loginScreen.style.display = 'flex';
+          return;
+        }
+        const infoParts = [activeTeacher.name || activeTeacher.username];
+        if (activeTeacher.kelas) infoParts.push(activeTeacher.kelas);
+        guruHeaderSubtitle.textContent = `Guru: ${infoParts.join(' • ')}`;
+
+        guruScreen.style.display = 'flex';
+        renderGuruDashboard();
+      } else if (session.role === 'murid') {
+        const currentStudent = students.find(s => s.id === session.userId);
+        if (!currentStudent) {
+          setSession(null);
+          loginScreen.style.display = 'flex';
+          showToast('Sesi berakhir karena data siswa tidak ditemukan.');
+          return;
+        }
+        muridScreen.style.display = 'flex';
+        renderMuridDashboard(currentStudent);
+      }
+    }
+
+    // ========================================================
+    // LOGIKA DASHBOARD GURU
+    // ========================================================
+    function renderGuruDashboard() {
+      updateGuruStats();
+      renderGuruTable();
+    }
+
+    function updateGuruStats() {
+      statTotal.textContent = students.length;
+      statHadir.textContent = students.filter(s => s.status === 'Hadir').length;
+      statIzin.textContent = students.filter(s => s.status === 'Izin').length;
+      statSakit.textContent = students.filter(s => s.status === 'Sakit').length;
+      statAlpha.textContent = students.filter(s => s.status === 'Alpha').length;
+      statBelum.textContent = students.filter(s => !s.status || s.status === 'Belum').length;
+    }
+
+    function renderGuruTable() {
+      const keyword = searchInput.value.toLowerCase().trim();
+      const statusFilter = filterStatus.value;
+
+      if (students.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                  </svg>
+                </div>
+                <h4>Belum Ada Data Siswa</h4>
+                <p>Klik tombol <strong>"+ Tambah Siswa"</strong> di atas untuk mendaftarkan siswa pertama.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const filtered = students.filter(student => {
+        const matchKeyword =
+          student.name.toLowerCase().includes(keyword) ||
+          student.nis.toLowerCase().includes(keyword) ||
+          student.kelas.toLowerCase().includes(keyword);
+
+        const currentStatus = student.status || 'Belum';
+        const matchStatus = statusFilter === 'ALL' || currentStatus === statusFilter;
+        return matchKeyword && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              Tidak ada data siswa yang cocok dengan pencarian atau filter.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const statuses = ['Hadir', 'Izin', 'Sakit', 'Alpha'];
+
+      tableBody.innerHTML = filtered.map((student, index) => {
+        const currentStatus = student.status || 'Belum';
+        const statusLabel = currentStatus === 'Belum' ? 'Belum Absen' : currentStatus;
+        const noteHtml = student.note
+          ? `<span class="student-note">Catatan: "${escapeHTML(student.note)}"</span>`
+          : '';
+        const timeInfo = student.updatedAt
+          ? `${escapeHTML(student.updatedAt)} <br><small style="opacity:0.75">(${escapeHTML(student.updatedBy || 'Sistem')})</small>`
+          : '-';
+
+        const attButtons = statuses.map(st => {
+          const isActive = currentStatus === st ? `active-${st}` : '';
+          return `<button type="button" class="att-btn ${isActive}" data-action="status" data-id="${student.id}" data-status="${st}">${st}</button>`;
+        }).join('');
+
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td><span class="student-nis">${escapeHTML(student.nis)}</span></td>
+            <td>
+              <div class="student-name">${escapeHTML(student.name)}</div>
+              ${noteHtml}
+            </td>
+            <td>${escapeHTML(student.kelas)}</td>
+            <td><span class="status-pill pill-${currentStatus}">${statusLabel}</span></td>
+            <td><span class="time-badge">${timeInfo}</span></td>
+            <td><div class="att-group">${attButtons}</div></td>
+            <td>
+              <div class="action-btns">
+                <button type="button" class="btn btn-outline btn-sm" data-action="edit" data-id="${student.id}">Edit</button>
+                <button type="button" class="btn btn-danger btn-sm" data-action="delete" data-id="${student.id}">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Event Delegation pada Tabel Guru
+    tableBody.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      const studentIndex = students.findIndex(s => s.id === id);
+      if (studentIndex === -1) return;
+
+      if (action === 'status') {
+        const newStatus = btn.dataset.status;
+        students[studentIndex].status = newStatus;
+        students[studentIndex].updatedAt = getCurrentTimestamp();
+        students[studentIndex].updatedBy = 'Guru';
+        saveStudents();
+        renderGuruDashboard();
+        showToast(`Status ${students[studentIndex].name} diubah menjadi ${newStatus}`);
+      } else if (action === 'edit') {
+        openStudentModal(students[studentIndex]);
+      } else if (action === 'delete') {
+        const targetName = students[studentIndex].name;
+        openConfirm(
+          'Hapus Data Siswa',
+          `Apakah Anda yakin ingin menghapus data siswa "${targetName}"?`,
+          () => {
+            students = students.filter(s => s.id !== id);
+            saveStudents();
+            renderGuruDashboard();
+            showToast(`Data ${targetName} berhasil dihapus.`);
+          }
+        );
+      }
+    });
+
+    searchInput.addEventListener('input', renderGuruTable);
+    filterStatus.addEventListener('change', renderGuruTable);
+
+    // Reset Absensi Hari Ini
+    resetAttendanceBtn.addEventListener('click', () => {
+      if (students.length === 0) {
+        showToast('Belum ada data siswa untuk direset.');
+        return;
+      }
+      openConfirm(
+        'Reset Absensi Hari Ini',
+        'Semua status kehadiran siswa akan dikembalikan menjadi "Belum Absen". Lanjutkan?',
+        () => {
+          students = students.map(s => ({
+            ...s,
+            status: 'Belum',
+            note: '',
+            updatedAt: '',
+            updatedBy: ''
+          }));
+          saveStudents();
+          renderGuruDashboard();
+          showToast('Seluruh presensi hari ini telah direset.');
+        }
+      );
+    });
+
+    // Modal Tambah / Edit Siswa
+    function openStudentModal(student = null) {
+      if (student) {
+        modalTitle.textContent = 'Edit Data Siswa';
+        inputId.value = student.id;
+        inputNis.value = student.nis;
+        inputName.value = student.name;
+        inputClass.value = student.kelas;
+      } else {
+        modalTitle.textContent = 'Tambah Siswa Baru';
+        studentForm.reset();
+        inputId.value = '';
+      }
+      studentModal.classList.add('open');
+      inputNis.focus();
+    }
+
+    function closeStudentModal() {
+      studentModal.classList.remove('open');
+    }
+
+    openAddModalBtn.addEventListener('click', () => openStudentModal());
+    closeModalBtn.addEventListener('click', closeStudentModal);
+    cancelModalBtn.addEventListener('click', closeStudentModal);
+
+    studentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idVal = inputId.value.trim();
+      const nisVal = inputNis.value.trim();
+      const nameVal = inputName.value.trim();
+      const classVal = inputClass.value.trim();
+
+      // Validasi NIS Unik
+      const duplicate = students.find(
+        s => s.nis.toLowerCase() === nisVal.toLowerCase() && s.id !== idVal
+      );
+      if (duplicate) {
+        showToast(`Gagal: NIS "${nisVal}" sudah terdaftar untuk ${duplicate.name}!`);
+        return;
+      }
+
+      if (idVal) {
+        // Mode Edit
+        const idx = students.findIndex(s => s.id === idVal);
+        if (idx !== -1) {
+          students[idx].nis = nisVal;
+          students[idx].name = nameVal;
+          students[idx].kelas = classVal;
+          showToast('Data siswa berhasil diperbarui.');
+        }
+      } else {
+        // Mode Tambah Baru
+        const newStudent = {
+          id: 'std_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          nis: nisVal,
+          name: nameVal,
+          kelas: classVal,
+          status: 'Belum',
+          note: '',
+          updatedAt: '',
+          updatedBy: ''
+        };
+        students.push(newStudent);
+        showToast(`Siswa "${nameVal}" berhasil ditambahkan!`);
+      }
+
+      saveStudents();
+      closeStudentModal();
+      renderGuruDashboard();
+    });
+
+    // ========================================================
+    // LOGIKA DASHBOARD MURID (TERHUBUNG KE GURU)
+    // ========================================================
+    function updateChoiceCardsUI() {
+      choiceCards.forEach(card => {
+        const choice = card.dataset.choice;
+        card.className = 'choice-card';
+        if (choice === selectedMuridChoice) {
+          card.classList.add(`selected-${choice}`);
+        }
+      });
+    }
+
+    choiceCards.forEach(card => {
+      card.addEventListener('click', () => {
+        selectedMuridChoice = card.dataset.choice;
+        updateChoiceCardsUI();
+      });
+    });
+
+    function renderMuridDashboard(student) {
+      muridAvatar.textContent = student.name.charAt(0).toUpperCase();
+      muridProfileName.textContent = student.name;
+      muridProfileUsername.textContent = student.username || '-';
+      muridProfileNis.textContent = student.nis;
+      muridProfileKelas.textContent = student.kelas;
+
+      const currentStatus = student.status || 'Belum';
+      const statusLabel = currentStatus === 'Belum' ? 'Belum Absen' : currentStatus;
+
+      muridCurrentPill.textContent = statusLabel;
+      muridCurrentPill.className = `status-banner-value pill-${currentStatus}`;
+
+      if (currentStatus === 'Belum') {
+        muridCurrentTime.textContent = 'Anda belum mengirimkan presensi hari ini.';
+        muridCurrentNote.textContent = '';
+        muridFormSubtitle.textContent = 'Pilih status kehadiran Anda hari ini lalu klik Kirim Absensi';
+        muridSubmitBtn.disabled = false;
+        muridSubmitBtn.textContent = 'Kirim Absensi Sekarang';
+        muridNoteInput.disabled = false;
+        choiceCards.forEach(c => c.style.pointerEvents = 'auto');
+        selectedMuridChoice = 'Hadir';
+        updateChoiceCardsUI();
+      } else {
+        muridCurrentTime.textContent = `Tercatat pada ${student.updatedAt || '-'} (Oleh: ${student.updatedBy || 'Murid'})`;
+        muridCurrentNote.textContent = student.note ? `Catatan: "${student.note}"` : '';
+        muridFormSubtitle.textContent = 'Presensi Anda hari ini sudah tercatat dan terkirim ke Guru.';
+        muridSubmitBtn.disabled = true;
+        muridSubmitBtn.textContent = 'Presensi Sudah Terkirim';
+        muridNoteInput.value = student.note || '';
+        muridNoteInput.disabled = true;
+        selectedMuridChoice = ['Hadir', 'Izin', 'Sakit'].includes(currentStatus) ? currentStatus : '';
+        updateChoiceCardsUI();
+        choiceCards.forEach(c => c.style.pointerEvents = 'none');
+      }
+    }
+
+    muridAttendanceForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const session = getSession();
+      if (!session || session.role !== 'murid') return;
+
+      loadStudents();
+      const idx = students.findIndex(s => s.id === session.studentId);
+      if (idx === -1) return;
+
+      const noteText = muridNoteInput.value.trim();
+      if ((selectedMuridChoice === 'Izin' || selectedMuridChoice === 'Sakit') && !noteText) {
+        showToast(`Harap isi alasan/catatan untuk status ${selectedMuridChoice}.`);
+        muridNoteInput.focus();
+        return;
+      }
+
+      students[idx].status = selectedMuridChoice;
+      students[idx].note = noteText;
+      students[idx].updatedAt = getCurrentTimestamp();
+      students[idx].updatedBy = 'Murid';
+
+      saveStudents();
+      renderMuridDashboard(students[idx]);
+      showToast(`Berhasil! Presensi "${selectedMuridChoice}" telah dikirim ke Guru.`);
+    });
+
+    // ========================================================
+    // SINKRONISASI REAL-TIME ANTAR TAB (GURU <-> MURID)
+    // ========================================================
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEYS.STUDENTS || e.key === STORAGE_KEYS.TEACHERS) {
+        routeApp();
+        showToast('Data akun & presensi diperbarui secara real-time!');
+      } else if (e.key === STORAGE_KEYS.THEME) {
+        applyTheme(e.newValue || 'light');
+      }
+    });
+
+    // Inisialisasi Awal
+    routeApp();
+  </script>
+</body>
+</html>
